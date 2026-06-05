@@ -1,0 +1,211 @@
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap');
+:root{--bg:#eef1f5;--card:#fff;--line:#e1e6ed;--ink:#141b2d;--mute:#646e82;--green:#15a34a;--greenbg:#dcfce7;--red:#dc2626;--redbg:#fee2e2;--blue:#2563eb;--bluebg:#dbeafe;--amber:#d97706;--amberbg:#fef3c7;--purple:#7c3aed;--purplebg:#ede9fe;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 20px 80px}
+.head h1{font-size:26px;font-weight:800;letter-spacing:-.6px}.head h1 .hl{color:var(--blue)}
+.head .sub{color:var(--mute);font-size:13px;margin-top:5px}
+.head .src{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mute);margin-top:8px;background:var(--card);display:inline-block;padding:5px 11px;border-radius:7px;border:1px solid var(--line)}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:20px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kpi .l{font-size:11px;color:var(--mute);font-weight:600}.kpi .v{font-size:23px;font-weight:800;margin-top:5px;letter-spacing:-1px}.kpi .s{font-size:11px;margin-top:3px;color:var(--green);font-weight:600}
+.tabs{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap}
+.tab{font-family:'IBM Plex Mono',monospace;font-size:12px;padding:9px 15px;background:var(--card);border:1px solid var(--line);border-radius:9px;cursor:pointer;transition:.15s}
+.tab:hover{border-color:var(--blue)}.tab.on{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600}
+.sec-h{font-size:15px;font-weight:700;margin:20px 0 12px;display:flex;align-items:center;gap:8px}
+.sec-h .bar{width:4px;height:16px;border-radius:2px;background:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px}
+.card h3{font-size:13.5px;font-weight:700;margin-bottom:13px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);font-weight:600;padding:8px;border-bottom:2px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line)}td.num{font-family:'IBM Plex Mono',monospace;text-align:right}
+tr:last-child td{border-bottom:none}tr:hover td{background:#f8fafc}
+.pill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:'IBM Plex Mono',monospace}
+.pill.g{background:var(--greenbg);color:var(--green)}.pill.r{background:var(--redbg);color:var(--red)}.pill.b{background:var(--bluebg);color:var(--blue)}.pill.a{background:var(--amberbg);color:var(--amber)}.pill.p{background:var(--purplebg);color:var(--purple)}
+.barrow{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.barrow .lb{width:135px;font-size:11.5px;font-weight:600;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.barrow .track{flex:1;height:20px;background:#f1f5f9;border-radius:5px;overflow:hidden}
+.barrow .fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:#fff;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;min-width:28px}
+.insight{background:#f0f9ff;border:1px solid #bae6fd;border-radius:11px;padding:13px 15px;font-size:12.5px;line-height:1.7;margin-top:13px}.insight b{color:var(--blue)}
+.insight.warn{background:#fffbeb;border-color:#fde68a}.insight.warn b{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.econ-box{background:#0f1729;color:#e2e8f0;border-radius:13px;padding:18px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.8;overflow-x:auto}
+.econ-box .eq{color:#7dd3fc;font-weight:600;font-size:12.5px;margin-bottom:10px}
+.econ-box .sig{color:#86efac}.econ-box .ns{color:#fca5a5}
+.econ-box table{font-size:11px}.econ-box th{color:#94a3b8;border-color:#334155}.econ-box td{border-color:#1e293b;color:#cbd5e1}
+.note{font-size:11px;color:var(--mute);font-style:italic;margin-top:8px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+</style>
+<script type="text/babel">
+const {useState}=React;
+const D={"total": 23869, "n_niche": 17, "n_shop": 7749, "gia_tb": 22.95, "niche": [{"niche": "Teacher / Giao vien", "so_sp": 1684, "gia_tb": 20.96, "fav_tb": 67.89, "fav_trungvi": 1.0, "view_tb": 1344.46, "fpd": 0.15, "conv": 5.05, "co_hoi": 1.7}, {"niche": "Christian / Faith", "so_sp": 2320, "gia_tb": 23.99, "fav_tb": 58.66, "fav_trungvi": 1.0, "view_tb": 1175.0, "fpd": 0.15, "conv": 4.99, "co_hoi": 1.2}, {"niche": "Ca nhan hoa (Custom)", "so_sp": 1869, "gia_tb": 23.11, "fav_tb": 43.68, "fav_trungvi": 1.0, "view_tb": 1433.36, "fpd": 0.16, "conv": 3.05, "co_hoi": 1.0}, {"niche": "Khac / Other", "so_sp": 15, "gia_tb": 26.98, "fav_tb": 43.13, "fav_trungvi": 0.0, "view_tb": 1293.8, "fpd": 0.06, "conv": 3.33, "co_hoi": 11.1}, {"niche": "Nurse / Y te", "so_sp": 1892, "gia_tb": 23.62, "fav_tb": 34.66, "fav_trungvi": 2.0, "view_tb": 783.84, "fpd": 0.09, "conv": 4.42, "co_hoi": 0.8}, {"niche": "Mom / Family", "so_sp": 3858, "gia_tb": 22.5, "fav_tb": 34.37, "fav_trungvi": 1.0, "view_tb": 777.28, "fpd": 0.07, "conv": 4.42, "co_hoi": 0.6}, {"niche": "Cat lover", "so_sp": 1684, "gia_tb": 21.99, "fav_tb": 27.7, "fav_trungvi": 1.0, "view_tb": 462.78, "fpd": 0.05, "conv": 5.99, "co_hoi": 0.7}, {"niche": "Father's Day / Dad", "so_sp": 3256, "gia_tb": 22.02, "fav_tb": 27.34, "fav_trungvi": 0.0, "view_tb": 459.15, "fpd": 0.03, "conv": 5.96, "co_hoi": 0.5}, {"niche": "Raccoon / Meme thu", "so_sp": 1786, "gia_tb": 24.1, "fav_tb": 23.88, "fav_trungvi": 0.0, "view_tb": 348.15, "fpd": 0.1, "conv": 6.86, "co_hoi": 0.6}, {"niche": "Halloween", "so_sp": 2004, "gia_tb": 17.7, "fav_tb": 22.7, "fav_trungvi": 1.0, "view_tb": 535.49, "fpd": 0.03, "conv": 4.24, "co_hoi": 0.5}, {"niche": "Hunting / Outdoor", "so_sp": 1735, "gia_tb": 25.0, "fav_tb": 18.27, "fav_trungvi": 1.0, "view_tb": 335.61, "fpd": 0.03, "conv": 5.44, "co_hoi": 0.4}, {"niche": "Christmas / Le", "so_sp": 90, "gia_tb": 18.49, "fav_tb": 17.32, "fav_trungvi": 4.0, "view_tb": 476.29, "fpd": 0.01, "conv": 3.64, "co_hoi": 1.8}, {"niche": "Retro / Vintage", "so_sp": 1521, "gia_tb": 24.95, "fav_tb": 15.76, "fav_trungvi": 1.0, "view_tb": 317.72, "fpd": 0.05, "conv": 4.96, "co_hoi": 0.4}, {"niche": "Concert / Band Tour", "so_sp": 31, "gia_tb": 22.96, "fav_tb": 15.19, "fav_trungvi": 1.0, "view_tb": 384.35, "fpd": 0.05, "conv": 3.95, "co_hoi": 2.7}, {"niche": "Dog lover", "so_sp": 118, "gia_tb": 23.6, "fav_tb": 10.14, "fav_trungvi": 1.0, "view_tb": 229.9, "fpd": 0.02, "conv": 4.41, "co_hoi": 0.9}, {"niche": "Patriotic / USA", "so_sp": 2, "gia_tb": 9.0, "fav_tb": 2.5, "fav_trungvi": 2.5, "view_tb": 41.0, "fpd": 0.01, "conv": 6.1, "co_hoi": 1.8}, {"niche": "Funny / Humor", "so_sp": 4, "gia_tb": 24.97, "fav_tb": 0.0, "fav_trungvi": 0.0, "view_tb": 8.25, "fpd": 0.0, "conv": 0.0, "co_hoi": 0.0}], "anova": {"f": 5.5, "p": 4.504649047674289e-10, "ket_luan": "Các niche KHÁC NHAU rõ rệt về lượt thích"}, "elas": [{"niche": "Christmas / Le", "do_co_gian": -0.932, "so_sp": 64}, {"niche": "Halloween", "do_co_gian": -0.342, "so_sp": 1208}, {"niche": "Nurse / Y te", "do_co_gian": -0.313, "so_sp": 1262}, {"niche": "Christian / Faith", "do_co_gian": -0.298, "so_sp": 1466}, {"niche": "Hunting / Outdoor", "do_co_gian": -0.28, "so_sp": 1044}, {"niche": "Ca nhan hoa (Custom)", "do_co_gian": -0.242, "so_sp": 1007}, {"niche": "Cat lover", "do_co_gian": -0.136, "so_sp": 981}, {"niche": "Mom / Family", "do_co_gian": -0.07, "so_sp": 2101}, {"niche": "Father's Day / Dad", "do_co_gian": -0.026, "so_sp": 1298}, {"niche": "Teacher / Giao vien", "do_co_gian": -0.023, "so_sp": 1024}, {"niche": "Raccoon / Meme thu", "do_co_gian": -0.014, "so_sp": 817}, {"niche": "Dog lover", "do_co_gian": 0.051, "so_sp": 70}, {"niche": "Retro / Vintage", "do_co_gian": 0.118, "so_sp": 957}], "top_shop": [{"shop_name": "TeeTELIER", "total_sales": 152612, "num_listings": 3625, "review_average": 4.9, "shop_age_days": 2736, "sales_per_day": 55.8, "sales_per_listing": 42.1}, {"shop_name": "DapperCustomTees", "total_sales": 110007, "num_listings": 4747, "review_average": 4.85, "shop_age_days": 1017, "sales_per_day": 108.2, "sales_per_listing": 23.2}, {"shop_name": "HTownApparel", "total_sales": 105021, "num_listings": 1465, "review_average": 4.83, "shop_age_days": 2276, "sales_per_day": 46.1, "sales_per_listing": 71.7}, {"shop_name": "CandourRoyalTees", "total_sales": 51892, "num_listings": 1881, "review_average": 4.81, "shop_age_days": 1771, "sales_per_day": 29.3, "sales_per_listing": 27.6}, {"shop_name": "MYBteeShop", "total_sales": 44971, "num_listings": 5142, "review_average": 4.83, "shop_age_days": 953, "sales_per_day": 47.2, "sales_per_listing": 8.7}, {"shop_name": "ElegancyTeeCraft", "total_sales": 42723, "num_listings": 818, "review_average": 4.8, "shop_age_days": 1228, "sales_per_day": 34.8, "sales_per_listing": 52.2}, {"shop_name": "MEVASHIRTDESIGN", "total_sales": 40509, "num_listings": 3413, "review_average": 4.77, "shop_age_days": 1278, "sales_per_day": 31.7, "sales_per_listing": 11.9}, {"shop_name": "DreamBigTshirtShoppe", "total_sales": 37927, "num_listings": 3391, "review_average": 4.94, "shop_age_days": 2465, "sales_per_day": 15.4, "sales_per_listing": 11.2}, {"shop_name": "StylishTeeShirt", "total_sales": 37734, "num_listings": 5884, "review_average": 4.83, "shop_age_days": 720, "sales_per_day": 52.4, "sales_per_listing": 6.4}, {"shop_name": "TulaTopsCo", "total_sales": 37315, "num_listings": 1906, "review_average": 4.83, "shop_age_days": 1324, "sales_per_day": 28.2, "sales_per_listing": 19.6}, {"shop_name": "CustomTeePoint", "total_sales": 33094, "num_listings": 2472, "review_average": 4.76, "shop_age_days": 2040, "sales_per_day": 16.2, "sales_per_listing": 13.4}, {"shop_name": "SentimaDesign", "total_sales": 32643, "num_listings": 807, "review_average": 4.89, "shop_age_days": 3465, "sales_per_day": 9.4, "sales_per_listing": 40.4}, {"shop_name": "FitCustomShirt", "total_sales": 29960, "num_listings": 1386, "review_average": 4.65, "shop_age_days": 1785, "sales_per_day": 16.8, "sales_per_listing": 21.6}, {"shop_name": "ColorfulTeeStation", "total_sales": 29388, "num_listings": 4604, "review_average": 4.79, "shop_age_days": 1000, "sales_per_day": 29.4, "sales_per_listing": 6.4}, {"shop_name": "ChloesComfyThreads", "total_sales": 22290, "num_listings": 2139, "review_average": 4.91, "shop_age_days": 1699, "sales_per_day": 13.1, "sales_per_listing": 10.4}], "eff_shop": [{"shop_name": "DapperCustomTees", "total_sales": 110007, "sales_per_day": 108.2, "shop_age_days": 1017, "review_average": 4.85}, {"shop_name": "StylishTeeShirt", "total_sales": 37734, "sales_per_day": 52.4, "shop_age_days": 720, "review_average": 4.83}, {"shop_name": "CustomTeezCenter", "total_sales": 16833, "sales_per_day": 48.5, "shop_age_days": 347, "review_average": 4.74}, {"shop_name": "MYBteeShop", "total_sales": 44971, "sales_per_day": 47.2, "shop_age_days": 953, "review_average": 4.83}, {"shop_name": "ElegancyTeeCraft", "total_sales": 42723, "sales_per_day": 34.8, "shop_age_days": 1228, "review_average": 4.8}, {"shop_name": "MEVASHIRTDESIGN", "total_sales": 40509, "sales_per_day": 31.7, "shop_age_days": 1278, "review_average": 4.77}, {"shop_name": "ColorfulTeeStation", "total_sales": 29388, "sales_per_day": 29.4, "shop_age_days": 1000, "review_average": 4.79}, {"shop_name": "TulaTopsCo", "total_sales": 37315, "sales_per_day": 28.2, "shop_age_days": 1324, "review_average": 4.83}, {"shop_name": "NecNecGifts", "total_sales": 20291, "sales_per_day": 14.8, "shop_age_days": 1368, "review_average": 4.85}, {"shop_name": "RedPrairieApparel", "total_sales": 5806, "sales_per_day": 7.4, "shop_age_days": 787, "review_average": 4.95}], "band": [{"band": "<$10", "sp": 1951, "fav_tong": 72379, "fav_tb": 37.1}, {"band": "$10-15", "sp": 2842, "fav_tong": 139952, "fav_tb": 49.2}, {"band": "$15-20", "sp": 5425, "fav_tong": 170800, "fav_tb": 31.5}, {"band": "$20-25", "sp": 4434, "fav_tong": 148548, "fav_tb": 33.5}, {"band": "$25-30", "sp": 3857, "fav_tong": 135187, "fav_tb": 35.0}, {"band": "$30+", "sp": 5360, "fav_tong": 146742, "fav_tb": 27.4}], "top_fav": [{"title": "AWESOME DAD This is what an dad looks like MENS T-shirt shirt tshirt  gift Father's Day gift Funny Dad Shirt GIft for Daddy", "price": 27.95, "num_favorers": 23212, "niche": "Father's Day / Dad", "url": "https://www.etsy.com/listing/110779572/awesome-dad-this-is-what-an-dad-looks"}, {"title": "Funny Shirt for Men | Awesome Like My Daughter | Fathers Dad Gift - Gift from Daughter to Dad - Husband Gift - Funny Dad Shirt", "price": 21.56, "num_favorers": 12892, "niche": "Father's Day / Dad", "url": "https://www.etsy.com/listing/980584762/funny-dad-shirt-awesome-like-my-daughter"}, {"title": "Comfort Color Mama Shirt | Mom Shirt, Mommy Shirt, Mama T-Shirt, Cute Mom Shirt, Mother's Day Gift, Mom Life Shirt, Mama Shirt", "price": 10.99, "num_favorers": 11063, "niche": "Mom / Family", "url": "https://www.etsy.com/listing/1151425746/comfort-color-mama-shirt-mom-shirt-mommy"}, {"title": "Mama Embroidered Baby Outfit Keepsake Applique Sweatshirt  | Simple Mama Pullover, Gift for Mom, Personalized Mama Shirt", "price": 50.0, "num_favorers": 9767, "niche": "Ca nhan hoa (Custom)", "url": "https://www.etsy.com/listing/1570217594/mama-embroidered-baby-outfit-keepsake"}, {"title": "Funny Dad Shirt – Proud Father of Dumbass Kids, Father's Day Gift", "price": 22.39, "num_favorers": 5765, "niche": "Father's Day / Dad", "url": "https://www.etsy.com/listing/689504356/funny-dad-t-shirt-proud-father-of"}, {"title": "I Like Cats And Coffee Shirt, Coffee Lover Shirt, Funny Cat Shirt, Cat Mom Gift, Cat Lover Shirt, Retro Coffee Shirt, Vintage Cat Shirt", "price": 11.7, "num_favorers": 5204, "niche": "Mom / Family", "url": "https://www.etsy.com/listing/1302581484/i-like-cats-and-coffee-shirt-coffee"}, {"title": "Custom Dad Vintage Photo Shirt: Personalized Fathers Day Shirt With Kids Photo, Funny Dad Shirt, Best Dad Ever Shirt, New Dad Gift", "price": 11.65, "num_favorers": 5080, "niche": "Ca nhan hoa (Custom)", "url": "https://www.etsy.com/listing/4492750007/custom-dad-vintage-photo-shirt"}, {"title": "Mama Shirt, Gift for Mom, Mothers Day Gift Mommy Shirt, Mom-life Shirt, Shirt for Mom, Trendy Mom T-Shirt, Cool Mom Tee, Cursive Mama Shirt", "price": 13.96, "num_favorers": 4823, "niche": "Mom / Family", "url": "https://www.etsy.com/listing/791569853/mama-shirt-gift-for-mom-mothers-day-gift"}, {"title": "Comfort Colors® Bible Verse Shirt, Cute Christian Shirt For Women,Jesus Shirt,Christian Gift, Christian Christmas Shirt,Love and Grace Shirt", "price": 28.8, "num_favorers": 4726, "niche": "Christian / Faith", "url": "https://www.etsy.com/listing/4314120175/comfort-colors-bible-verse-shirt-cute"}, {"title": "Old School Band Tee, Vintage Retro Band Tee, Beatle Strawberry Fields Rock Band Tee, Oversized Trendy Shirts, Comfort Colors® Band Shirt", "price": 35.0, "num_favorers": 4699, "niche": "Teacher / Giao vien", "url": "https://www.etsy.com/listing/1601137634/old-school-band-tee-vintage-retro-band"}, {"title": "Disney Halloween Shirt, Disney Shirt, Halloween Matching Shirts, Halloween Shirt, Disney Matching Shirts, Disney Trip Shirts, Disneyland Tee", "price": 18.99, "num_favorers": 4531, "niche": "Halloween", "url": "https://www.etsy.com/listing/1271301287/disney-halloween-shirt-disney-shirt"}, {"title": "Make Heaven Crowded Unisex Christian Shirt,Christian clothing,Bible verse shirt,Aesthetic shirt,Religious Shirt, Church Shırt,gıft for her", "price": 26.0, "num_favorers": 4395, "niche": "Christian / Faith", "url": "https://www.etsy.com/listing/1730471863/make-heaven-crowded-unisex-christian"}, {"title": "Disney Mama Shirt, Minnie Disney Mom Shirt, Minnie Mama Tee, Disney Mommy Birthday Shirt, Disney Family Trip Tee", "price": 12.7, "num_favorers": 4144, "niche": "Mom / Family", "url": "https://www.etsy.com/listing/1761751212/disney-mama-shirt-minnie-disney-mom"}, {"title": "His Way Is Better Christian Shirt Comfort Colors Cute Christian Merch Jesus Shirt Minimalist Christian Faith Gift for Teen Christian Apparel", "price": 31.99, "num_favorers": 4140, "niche": "Christian / Faith", "url": "https://www.etsy.com/listing/4317185403/his-way-is-better-christian-shirt"}, {"title": "Registered Silly Goose Sweatshirt, RN Shirt, Nurse Gift, Nurse Shirt, Funny Shirt, Funny Goose Shirt,Funny Gift, Gag Gift, Nurse Day, Nurse", "price": 19.25, "num_favorers": 3682, "niche": "Nurse / Y te", "url": "https://www.etsy.com/listing/1783342402/registered-silly-goose-sweatshirt-rn"}], "top_speed": [{"title": "Custom Dad Vintage Photo Shirt: Personalized Fathers Day Shirt With Kids Photo, Funny Dad Shirt, Best Dad Ever Shirt, New Dad Gift", "price": 11.65, "num_favorers": 5080, "fav_per_day": 120.952, "niche": "Ca nhan hoa (Custom)"}, {"title": "Comfort Colors Raccoon Cotton Candy Drink Graphic Tee, Fun Animal Lover Shirt, Vintage Raccoons Shirt, Funny Meme Genz Dank Raccoons Shirt", "price": 9.25, "num_favorers": 1442, "fav_per_day": 23.639, "niche": "Raccoon / Meme thu"}, {"title": "Funny Raccoon Shirt – Raccoon Moon Graphic Tee, Vintage Animal T-Shirt, Retro Aesthetic", "price": 10.98, "num_favorers": 2161, "fav_per_day": 12.94, "niche": "Raccoon / Meme thu"}, {"title": "Comfort Colors® Bible Verse Shirt, Cute Christian Shirt For Women,Jesus Shirt,Christian Gift, Christian Christmas Shirt,Love and Grace Shirt", "price": 28.8, "num_favorers": 4726, "fav_per_day": 12.877, "niche": "Christian / Faith"}, {"title": "Comfort Colors® Custom Seagulls Teacher Shirt, Funny Teacher Tee, Teacher Appreciation Gift, Funny Personalized Teacher Nemo T-shirt", "price": 20.57, "num_favorers": 694, "fav_per_day": 12.852, "niche": "Ca nhan hoa (Custom)"}, {"title": "Comfort Colors Christian Shirt: Isaiah 43.2 Shirt, Bible Verse Tee,  Faith Based ,  Church Team", "price": 14.0, "num_favorers": 2871, "fav_per_day": 11.671, "niche": "Christian / Faith"}, {"title": "His Way Is Better Christian Shirt Comfort Colors Cute Christian Merch Jesus Shirt Minimalist Christian Faith Gift for Teen Christian Apparel", "price": 31.99, "num_favorers": 4140, "fav_per_day": 11.468, "niche": "Christian / Faith"}, {"title": "Comfort Colors® Custom Seagulls Teacher Shirt, Funny Teacher Tee, Teacher Appreciation Gift, Funny Personalized Teacher Nemo T-shirt", "price": 18.0, "num_favorers": 460, "fav_per_day": 10.698, "niche": "Ca nhan hoa (Custom)"}, {"title": "Mama Embroidered Baby Outfit Keepsake Applique Sweatshirt  | Simple Mama Pullover, Gift for Mom, Personalized Mama Shirt", "price": 50.0, "num_favorers": 9767, "fav_per_day": 10.09, "niche": "Ca nhan hoa (Custom)"}, {"title": "Comfort Colors® Custom Dad Vintage Photo Shirt, Custom Fathers Day Shirt With Kids Photo, Funny Dad Shirt, Best Dad Ever Shirt, New Dad Gift", "price": 22.0, "num_favorers": 220, "fav_per_day": 10.0, "niche": "Ca nhan hoa (Custom)"}, {"title": "Comfort Colors Reading Tshirt Silly Goose Teacher Shirt Bookish Gifts for Librarian Shirt Book Lover Gift Stamp Shirts Fall Trendy Tshirt", "price": 17.97, "num_favorers": 2727, "fav_per_day": 9.568, "niche": "Teacher / Giao vien"}, {"title": "Funny Dad Shirt, Just Resting My Eyes Shirt for Dad Gift for Dad, Funny Fathers Day Shirt, Funny Mens Tshirt, Dad T Shirt, Fathers Day C385", "price": 27.14, "num_favorers": 3046, "fav_per_day": 9.202, "niche": "Father's Day / Dad"}, {"title": "Comfort Colors Bookish Raccoon Shirt, Reading T-Shirt, Fantasy Book Lover Gift, Mystery Thriller Reader Shirt, Funny Trash Panda Book Nerd", "price": 26.99, "num_favorers": 1093, "fav_per_day": 9.033, "niche": "Raccoon / Meme thu"}, {"title": "Comfort Colors® Christian Shirt His Mercies Are New Every Morning Bible Verse Shirt Religious Women Gift Floral Jesus Shirt,Faith Christian", "price": 23.4, "num_favorers": 3087, "fav_per_day": 8.145, "niche": "Christian / Faith"}, {"title": "Comfort Colors® Teacher Life Shirt, Cute Be Kind Shirt, Back to School Shirt, Team Elementary School Teacher Shirt, School Supply Shirt", "price": 24.99, "num_favorers": 2495, "fav_per_day": 7.997, "niche": "Teacher / Giao vien"}], "ols": {"r2": 0.824, "r2adj": 0.824, "f": 7918.6, "n": 23727, "base": "Mom / Family", "coef": [{"var": "const", "b": -0.846, "t": -32.1, "p": 0.0}, {"var": "lniche: price", "b": -0.1, "t": -13.5, "p": 0.0}, {"var": "lniche: views", "b": 0.686, "t": 297.8, "p": 0.0}, {"var": "age", "b": -0.0, "t": -7.0, "p": 0.0}, {"var": "niche: Ca nhan hoa (Custom)", "b": -0.093, "t": -4.8, "p": 0.0}, {"var": "niche: Cat lover", "b": 0.088, "t": 4.4, "p": 0.0}, {"var": "niche: Christian / Faith", "b": 0.031, "t": 1.7, "p": 0.0823}, {"var": "niche: Dog lover", "b": -0.107, "t": -1.7, "p": 0.0919}, {"var": "niche: Father's Day / Dad", "b": -0.051, "t": -3.2, "p": 0.0016}, {"var": "niche: Halloween", "b": -0.119, "t": -6.3, "p": 0.0}, {"var": "niche: Hunting / Outdoor", "b": -0.083, "t": -4.2, "p": 0.0}, {"var": "niche: Nurse / Y te", "b": 0.04, "t": 2.1, "p": 0.0383}, {"var": "niche: Raccoon / Meme thu", "b": 0.167, "t": 8.5, "p": 0.0}, {"var": "niche: Retro / Vintage", "b": -0.024, "t": -1.2, "p": 0.2442}, {"var": "niche: Teacher / Giao vien", "b": 0.111, "t": 5.6, "p": 0.0}]}};
+const fmt=n=>new Intl.NumberFormat('en-US').format(Math.round(n||0));
+const usd=n=>"$"+(Math.round(n*100)/100).toFixed(2);
+const C=["#2563eb","#15a34a","#d97706","#7c3aed","#dc2626","#0891b2","#db2777","#65a30d","#9333ea","#e11d48","#0d9488","#ca8a04","#4f46e5","#16a34a","#f59e0b","#8b5cf6","#ef4444"];
+
+function App(){
+  const [tab,setTab]=useState("niche");
+  const niche=D.niche, ols=D.ols;
+  const maxFav=Math.max(...niche.map(n=>n.fav_tb));
+  const maxCohoi=Math.max(...niche.map(n=>n.co_hoi));
+  const maxBand=Math.max(...D.band.map(b=>b.fav_tong));
+  const maxShop=Math.max(...D.top_shop.map(s=>s.total_sales));
+
+  return (
+    <div className="wrap">
+      <div className="head">
+        <h1><span className="hl">Etsy Market Intelligence</span> — Phân tích kinh tế lượng theo niche</h1>
+        <div className="sub">29.5K sản phẩm · 17 niche · phân tích OLS, biến giả, ANOVA, độ co giãn giá</div>
+        <div className="src">Nguồn: Etsy API · {fmt(D.total)} SP sạch · {fmt(D.n_shop)} shop · "Đừng đọc một con số khi nó đứng một mình"</div>
+      </div>
+
+      <div className="kpis">
+        <div className="kpi"><div className="l">Sản phẩm</div><div className="v">{fmt(D.total)}</div><div className="s">đã làm sạch</div></div>
+        <div className="kpi"><div className="l">Niche</div><div className="v">{D.n_niche}</div><div className="s">phân loại</div></div>
+        <div className="kpi"><div className="l">Shop</div><div className="v">{fmt(D.n_shop)}</div><div className="s">khác nhau</div></div>
+        <div className="kpi"><div className="l">Giá trung vị</div><div className="v">{usd(D.gia_tb)}</div><div className="s">toàn thị trường</div></div>
+        <div className="kpi"><div className="l">R² mô hình</div><div className="v">{ols.r2}</div><div className="s">OLS log-log</div></div>
+      </div>
+
+      <div className="tabs">
+        <div className={"tab"+(tab==="niche"?" on":"")} onClick={()=>setTab("niche")}>So sánh Niche</div>
+        <div className={"tab"+(tab==="econ"?" on":"")} onClick={()=>setTab("econ")}>Mô hình kinh tế lượng</div>
+        <div className={"tab"+(tab==="elas"?" on":"")} onClick={()=>setTab("elas")}>Độ co giãn giá</div>
+        <div className={"tab"+(tab==="shop"?" on":"")} onClick={()=>setTab("shop")}>So sánh Shop</div>
+        <div className={"tab"+(tab==="prod"?" on":"")} onClick={()=>setTab("prod")}>Sản phẩm</div>
+      </div>
+
+      {tab==="niche" && <>
+        <div className="sec-h"><span className="bar"></span>Bảng so sánh 17 niche (đặt cạnh nhau)</div>
+        <div className="card" style={{padding:'10px 6px'}}>
+          <table>
+            <thead><tr><th>Niche</th><th style={{textAlign:'right'}}>Số SP</th><th style={{textAlign:'right'}}>Giá TV</th><th style={{textAlign:'right'}}>Thích TB</th><th style={{textAlign:'right'}}>Thích TV</th><th style={{textAlign:'right'}}>Thích/Xem</th><th style={{textAlign:'right'}}>Điểm cơ hội</th></tr></thead>
+            <tbody>
+              {niche.map((n,i)=>(
+                <tr key={n.niche}>
+                  <td style={{fontWeight:600}}>{n.niche}</td>
+                  <td className="num">{fmt(n.so_sp)}</td>
+                  <td className="num">{usd(n.gia_tb)}</td>
+                  <td className="num" style={{fontWeight:700}}>{fmt(n.fav_tb)}</td>
+                  <td className="num">{fmt(n.fav_trungvi)}</td>
+                  <td className="num">{n.conv}%</td>
+                  <td style={{textAlign:'right'}}><span className={"pill "+(n.co_hoi>maxCohoi*0.6?"g":n.co_hoi>maxCohoi*0.3?"a":"r")}>{n.co_hoi}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="note">Điểm cơ hội = lượt thích TB / căn(số SP) — niche hút quan tâm cao nhưng ít cạnh tranh thì điểm cao (đáng nhảy vào).</div>
+        </div>
+        <div className="grid2">
+          <div className="card"><h3>Lượt thích TB theo niche</h3>
+            {niche.slice(0,12).map((n,i)=>(<div className="barrow" key={n.niche}><span className="lb">{n.niche}</span><div className="track"><div className="fill" style={{width:Math.max(n.fav_tb/maxFav*100,6)+'%',background:C[i]}}>{fmt(n.fav_tb)}</div></div></div>))}
+          </div>
+          <div className="card"><h3>Điểm cơ hội (cao = ít cạnh tranh, nhiều quan tâm)</h3>
+            {[...niche].sort((a,b)=>b.co_hoi-a.co_hoi).slice(0,12).map((n,i)=>(<div className="barrow" key={n.niche}><span className="lb">{n.niche}</span><div className="track"><div className="fill" style={{width:Math.max(n.co_hoi/maxCohoi*100,6)+'%',background:'#15a34a'}}>{n.co_hoi}</div></div></div>))}
+          </div>
+        </div>
+        <div className="insight"><b>Đọc số:</b> Niche có <b>lượt thích TB cao</b> = nhu cầu lớn, nhưng nếu <b>số SP</b> cũng cao thì cạnh tranh gắt. <b>Điểm cơ hội</b> cân bằng hai yếu tố: niche điểm cơ hội cao (xanh) là nơi nhu cầu tốt mà chưa quá đông người làm — ưu tiên khảo sát.</div>
+      </>}
+
+      {tab==="econ" && <>
+        <div className="sec-h"><span className="bar"></span>Mô hình 1 — Hồi quy OLS log-log với biến giả niche</div>
+        <div className="econ-box">
+          <div className="eq">ln(favorers+1) = β₀ + β₁·ln(price) + β₂·ln(views) + β₃·age + Σ δᵢ·D(niche)ᵢ</div>
+          n = {fmt(ols.n)} &nbsp;|&nbsp; R² = {ols.r2} &nbsp;|&nbsp; R² adj = {ols.r2adj} &nbsp;|&nbsp; F = {ols.f} &nbsp;|&nbsp; base niche = "{ols.base}"
+          <table style={{marginTop:12,width:'100%'}}>
+            <thead><tr><th>Biến</th><th style={{textAlign:'right'}}>Hệ số β</th><th style={{textAlign:'right'}}>t-stat</th><th style={{textAlign:'right'}}>p-value</th><th>Ý nghĩa</th></tr></thead>
+            <tbody>
+              {ols.coef.map((c,i)=>(
+                <tr key={i}>
+                  <td>{c.var}</td>
+                  <td style={{textAlign:'right'}} className={c.b>0?"sig":"ns"}>{c.b>0?"+":""}{c.b}</td>
+                  <td style={{textAlign:'right'}}>{c.t}</td>
+                  <td style={{textAlign:'right'}}>{c.p}</td>
+                  <td>{c.p<0.01?"*** rất mạnh":c.p<0.05?"** mạnh":c.p<0.1?"* yếu":"không ý nghĩa"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="insight"><b>Diễn giải mô hình:</b> R² = <b>{ols.r2}</b> — mô hình giải thích {Math.round(ols.r2*100)}% biến động lượt thích (rất cao). <b>ln(views)</b> hệ số +0.69 — lượt xem là yếu tố mạnh nhất (xem tăng 1% → thích tăng 0.69%). <b>ln(price)</b> hệ số −0.10 — giá cao hơn gắn với thích ít hơn nhẹ. Các <b>biến giả niche</b> cho biết: so với niche gốc "{ols.base}", niche có hệ số dương (Raccoon +0.17, Teacher +0.11, Cat +0.09) hút nhiều thích hơn; hệ số âm (Halloween −0.12, Dog −0.11) ít hơn.</div>
+        <div className="sec-h"><span className="bar"></span>Mô hình 2 — Kiểm định ANOVA (các niche có thật sự khác nhau?)</div>
+        <div className="card">
+          <div style={{display:'flex',gap:30,alignItems:'center',flexWrap:'wrap'}}>
+            <div><div style={{fontSize:11,color:'var(--mute)'}}>F-statistic</div><div style={{fontSize:30,fontWeight:800,color:'var(--blue)'}}>{D.anova.f}</div></div>
+            <div><div style={{fontSize:11,color:'var(--mute)'}}>p-value</div><div style={{fontSize:30,fontWeight:800,color:'var(--green)'}}>{D.anova.p<0.001?"<0.001":D.anova.p.toFixed(3)}</div></div>
+            <div style={{flex:1,minWidth:200}}><span className="pill g">KẾT LUẬN</span> <div style={{marginTop:6,fontSize:13}}>{D.anova.ket_luan}</div></div>
+          </div>
+          <div className="insight"><b>Ý nghĩa:</b> p-value cực nhỏ (&lt;0.001) khẳng định <b>sự khác biệt lượt thích giữa các niche là có ý nghĩa thống kê</b>, không phải ngẫu nhiên. Việc chọn đúng niche thật sự quan trọng.</div>
+        </div>
+      </>}
+
+      {tab==="elas" && <>
+        <div className="sec-h"><span className="bar"></span>Mô hình 3 — Độ co giãn của cầu theo giá (price elasticity) từng niche</div>
+        <div className="card" style={{padding:'10px 6px'}}>
+          <table>
+            <thead><tr><th>Niche</th><th style={{textAlign:'right'}}>Độ co giãn</th><th style={{textAlign:'right'}}>Số SP</th><th>Diễn giải</th></tr></thead>
+            <tbody>
+              {D.elas.map((e,i)=>(
+                <tr key={i}>
+                  <td style={{fontWeight:600}}>{e.niche}</td>
+                  <td className="num" style={{fontWeight:700,color:e.do_co_gian<0?'var(--red)':'var(--green)'}}>{e.do_co_gian>0?"+":""}{e.do_co_gian}</td>
+                  <td className="num">{fmt(e.so_sp)}</td>
+                  <td style={{fontSize:11}}>{e.do_co_gian< -0.3?"Nhạy cảm giá — giá cao giảm quan tâm rõ":e.do_co_gian<0?"Hơi nhạy giá":"Không nhạy / giá cao vẫn hút"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="insight warn"><b>Cách dùng:</b> Độ co giãn <b>âm mạnh</b> (Christmas −0.93, Halloween −0.34) = khách rất nhạy giá, <b>nên định giá cạnh tranh</b>. Độ co giãn <b>gần 0 hoặc dương</b> (Retro +0.12, Dog +0.05, Raccoon −0.01) = giá ít ảnh hưởng quan tâm, <b>có thể định giá cao để tăng biên lợi nhuận</b>. Đây là kim chỉ nam định giá theo từng niche.</div>
+      </>}
+
+      {tab==="shop" && <>
+        <div className="sec-h"><span className="bar"></span>Top 15 shop theo tổng số bán</div>
+        <div className="card">
+          {D.top_shop.map((s,i)=>(<div className="barrow" key={i}><span className="lb">{i+1}. {s.shop_name}</span><div className="track"><div className="fill" style={{width:Math.max(s.total_sales/maxShop*100,5)+'%',background:C[i%C.length]}}>{fmt(s.total_sales)}</div></div></div>))}
+        </div>
+        <div className="grid2">
+          <div className="card" style={{padding:'10px 6px'}}><h3 style={{padding:'0 8px'}}>Shop top — hiệu suất chi tiết</h3>
+            <table><thead><tr><th>Shop</th><th style={{textAlign:'right'}}>Bán/ngày</th><th style={{textAlign:'right'}}>Bán/SP</th><th style={{textAlign:'right'}}>Rating</th></tr></thead>
+            <tbody>{D.top_shop.slice(0,10).map((s,i)=>(<tr key={i}><td style={{fontSize:11}}>{s.shop_name}</td><td className="num">{s.sales_per_day}</td><td className="num">{s.sales_per_listing}</td><td className="num">{s.review_average}</td></tr>))}</tbody></table>
+          </div>
+          <div className="card" style={{padding:'10px 6px'}}><h3 style={{padding:'0 8px'}}>Shop NON hiệu quả nhất (&lt;4 năm)</h3>
+            <table><thead><tr><th>Shop</th><th style={{textAlign:'right'}}>Tổng bán</th><th style={{textAlign:'right'}}>Bán/ngày</th><th style={{textAlign:'right'}}>Tuổi</th></tr></thead>
+            <tbody>{D.eff_shop.map((s,i)=>(<tr key={i}><td style={{fontSize:11}}>{s.shop_name}</td><td className="num" style={{color:'var(--blue)',fontWeight:700}}>{fmt(s.total_sales)}</td><td className="num" style={{color:'var(--green)'}}>{s.sales_per_day}</td><td className="num">{s.shop_age_days}d</td></tr>))}</tbody></table>
+          </div>
+        </div>
+        <div className="insight"><b>So sánh shop:</b> "Bán/SP" cho biết hiệu suất mỗi sản phẩm — shop bán/SP cao là làm ít mà tinh. Bảng <b>shop non hiệu quả</b> (bên phải) là hình mẫu thực tế cho người mới: mở chưa tới 4 năm nhưng tốc độ bán/ngày cao — chứng minh vẫn có cửa nếu sản phẩm đúng.</div>
+      </>}
+
+      {tab==="prod" && <>
+        <div className="grid2">
+          <div className="card" style={{padding:'10px 6px'}}><h3 style={{padding:'0 8px'}}>Top SP theo lượt thích</h3>
+            <table><thead><tr><th>Sản phẩm</th><th style={{textAlign:'right'}}>Thích</th><th style={{textAlign:'right'}}>Giá</th></tr></thead>
+            <tbody>{D.top_fav.map((p,i)=>(<tr key={i}><td style={{fontSize:11,maxWidth:230}}>{String(p.title).slice(0,42)}<div style={{color:'var(--mute)',fontSize:10}}>{p.niche}</div></td><td className="num" style={{color:'var(--red)',fontWeight:700}}>{fmt(p.num_favorers)}</td><td className="num">{usd(p.price)}</td></tr>))}</tbody></table>
+          </div>
+          <div className="card" style={{padding:'10px 6px'}}><h3 style={{padding:'0 8px'}}>Top SP theo tốc độ hot (fav/ngày)</h3>
+            <table><thead><tr><th>Sản phẩm</th><th style={{textAlign:'right'}}>Tốc độ</th><th style={{textAlign:'right'}}>Giá</th></tr></thead>
+            <tbody>{D.top_speed.map((p,i)=>(<tr key={i}><td style={{fontSize:11,maxWidth:230}}>{String(p.title).slice(0,42)}<div style={{color:'var(--mute)',fontSize:10}}>{p.niche}</div></td><td className="num" style={{color:'var(--green)',fontWeight:700}}>{p.fav_per_day}</td><td className="num">{usd(p.price)}</td></tr>))}</tbody></table>
+          </div>
+        </div>
+      </>}
+
+      <div className="card" style={{background:'#0f1729',color:'#fff',border:'none',marginTop:18}}>
+        <h3 style={{color:'#fff'}}>★ Kết luận tổng hợp từ các mô hình</h3>
+        <div style={{fontSize:13,lineHeight:1.9}}>
+          <div><b style={{color:'#7dd3fc'}}>1. Chọn niche:</b> ưu tiên niche "điểm cơ hội" cao — nhu cầu tốt + ít cạnh tranh (xem tab So sánh Niche).</div>
+          <div><b style={{color:'#7dd3fc'}}>2. Định giá theo độ co giãn:</b> niche nhạy giá (Christmas, Halloween) → giá cạnh tranh; niche ít nhạy (Retro, Raccoon) → định giá cao tăng biên.</div>
+          <div><b style={{color:'#7dd3fc'}}>3. Đòn bẩy lớn nhất là lượt xem:</b> mô hình OLS cho thấy views là yếu tố mạnh nhất (β=+0.69) → đầu tư vào hiển thị/marketing quan trọng hơn hạ giá.</div>
+          <div><b style={{color:'#7dd3fc'}}>4. Niche thật sự khác nhau:</b> ANOVA xác nhận (p&lt;0.001) → chọn đúng niche là quyết định có cơ sở thống kê.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
